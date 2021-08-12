@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 
 class Homepage extends StatelessWidget {
@@ -6,6 +7,8 @@ class Homepage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController email = TextEditingController();
+    TextEditingController password = TextEditingController();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body:  Column(
@@ -41,6 +44,7 @@ class Homepage extends StatelessWidget {
                     borderRadius: BorderRadiusDirectional.circular(12.0)
                   ),
                child: TextField(
+                 controller: email,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
@@ -59,6 +63,7 @@ class Homepage extends StatelessWidget {
                     borderRadius: BorderRadiusDirectional.circular(12.0)
                   ),
                   child:TextField(
+                    controller: password,
                   decoration: InputDecoration(
                    border: InputBorder.none,
                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
@@ -81,7 +86,21 @@ class Homepage extends StatelessWidget {
                      color: Colors.purpleAccent,
                      elevation: 8.0,
                      child:GestureDetector(
-                       onDoubleTap:(){print('hello');} ,
+                       onDoubleTap:()async {
+                        try {
+                          User user = (await FirebaseAuth.instance
+                              .signInWithEmailAndPassword(
+                                  email: email.text,
+                                  password: password.text)) as User;
+                          if (user.email != null) {
+                            Navigator.pushNamed(context, '/home');
+                          }
+                        } catch (e) {
+                          print(e);
+                          email.text = '';
+                          password.text = '';
+                        }
+                      },
                        child: Center(
                          child: Text('LOGIN',
                          style: TextStyle(

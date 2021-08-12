@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 class SignupPage extends StatefulWidget {
   SignupPage({Key? key}) : super(key: key);
 
@@ -7,6 +9,8 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+    TextEditingController _email = TextEditingController();
+  TextEditingController _password = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,6 +48,7 @@ class _SignupPageState extends State<SignupPage> {
                     borderRadius: BorderRadiusDirectional.circular(12.0)
                   ),
                child: TextField(
+                 controller: _email,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
@@ -62,6 +67,7 @@ class _SignupPageState extends State<SignupPage> {
                     borderRadius: BorderRadiusDirectional.circular(12.0)
                   ),
                   child:TextField(
+                    controller: _password,
                   decoration: InputDecoration(
                    border: InputBorder.none,
                    contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
@@ -84,7 +90,33 @@ class _SignupPageState extends State<SignupPage> {
                      color: Colors.purpleAccent,
                      elevation: 8.0,
                      child:GestureDetector(
-                       onTap:(){print('hello');} ,
+                       onTap:() async {
+                        try {
+                          await (FirebaseAuth.instance
+                              .createUserWithEmailAndPassword(
+                                  email: _email.text,
+                                  password: _password.text));
+
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Home(),
+                            ),
+                          );
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == 'weak-password') {
+                            print('The password provided is too weak.');
+                          } else if (e.code == 'email-already-in-use') {
+                            print('The account already exists for that email.');
+                          }
+                        } catch (e) {
+                          print(e);
+                          _email.text = '';
+
+                          _password.text = '';
+                        }
+                      },
+
                        child: Center(
                          child: Text('Create New Account',
                          style: TextStyle(
